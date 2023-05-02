@@ -46,8 +46,22 @@ struct Hello :  public FunctionPass, public CallInst
             errs() << "Hello: " ;
             errs().write_escaped(F.getName())<< "\n";
             
-            CallInst CI = 
-            ::
+            for (Function &F : M) {
+              for (BasicBlock &BB : F) {
+                for (Instruction &I : BB) {
+                  if (auto *CI = dyn_cast<CallInst>(&I)) {
+                    Function *CalledFunc = CI->getCalledFunction();
+                    if (CalledFunc != nullptr) {
+                      errs() << "Found function call: " << CalledFunc->getName() << "\n";
+                      for (unsigned int i = 0; i < CI->getNumArgOperands(); i++) {
+                        Value *Arg = CI->getArgOperand(i);
+                        errs() << "Argument " << i << ": " << *Arg << "\n";
+                      }
+                    }
+                  }
+                }
+              }
+            }
             return false;
         }
     
