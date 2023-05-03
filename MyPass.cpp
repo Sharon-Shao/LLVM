@@ -51,15 +51,31 @@ struct MyPass :  public FunctionPass
                                                 if (isa<Constant>(argC)){ //checks if the actual is a constant int
                                                         ValueToValueMapTy Vmap;
                                                         ClonedCodeInfo *codeInfo;
-                                                        //Clone
+                                                        /*Clone*/
                                                         Function *newFunction = CloneFunction(&F, Vmap, codeInfo);
                                                         //CallInst* newCI = CallInst::Create(newFunction, 
 
-                                                        //Replace
+                                                        /*Replace*/
                                                         //CI->removeFromParent();
 
                                                         CI->setCalledFunction(newFunction);
+                                                        /*create a constant symbol of type Value*/
+
+                                                        llvm::ConstantInt* constInt = llvm::dyn_cast<llvm::ConstantInt>(argC);
+                                                        int intValue = constInt->getSExtValue();
+
+                                                        LLVMContext& context = llvm::getGlobalContext();
+                                                        ConstantInt* myConst = ConstantInt::get(Type::getInt32Ty(context), intValue, false);
+
+                                                        for (Function::arg_iterator arg = F.arg_begin(), end = F.arg_end(); arg != end; ++arg) {
+                                                                if (&*arg == argC) {
+                                                                        argC->replaceAllUsesWith(myConst);
+                                                                }
+                                                        }
+
+                                                        errs() << myConst;
                                                 }
+
                                         }
                                 }
                         }
